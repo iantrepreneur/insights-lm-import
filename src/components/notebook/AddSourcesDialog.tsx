@@ -458,6 +458,15 @@ const AddSourcesDialog = ({
                 <p className="text-xs text-gray-500">
                   {t('supportedFileTypes')}
                 </p>
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  <Button 
+                    variant="outline" 
+                    disabled={isProcessingFiles}
+                    onClick={() => document.getElementById('file-upload')?.click()}
+                  >
+                    Choisir un fichier
+                  </Button>
+                </label>
                 <input
                   id="file-upload"
                   type="file"
