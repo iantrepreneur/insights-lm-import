@@ -77,17 +77,60 @@ export const useAudioOverview = (notebookId?: string) => {
           throw updateError;
         }
         
-        // Appeler l'Edge Function pour démarrer la génération audio
-        const { data, error } = await supabase.functions.invoke('generate-audio-overview', {
-          body: { notebookId }
-        });
+        // Appeler directement le webhook n8n au lieu de passer par l'Edge Function
+        const audioGenerationWebhookUrl = Deno.env.get('AUDIO_GENERATION_WEBHOOK_URL') || 
+                                         import.meta.env.VITE_AUDIO_GENERATION_WEBHOOK_URL;
+        const authHeader = Deno.env.get('NOTEBOOK_GENERATION_AUTH') || 
+                          import.meta.env.VITE_NOTEBOOK_GENERATION_AUTH;
+                          
+        if (audioGenerationWebhookUrl) {
+          console.log('Calling audio generation webhook directly:', audioGenerationWebhookUrl);
+          
+          // Récupérer les sources du notebook
+          const { data: sources } = await supabase
+            .from('sources')
+            .select('id, title, content, summary')
+            .eq('notebook_id', notebookId)
+            .eq('processing_status', 'completed');
+            
+          const sourceData = sources?.map(source => ({
+            title: source.title,
+            content: source.content || '',
+            summary: source.summary || ''
+          })) || [];
+          
+          // Appeler le webhook directement
+          const response = await fetch(audioGenerationWebhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': authHeader || '',
+            },
+            body: JSON.stringify({
+              notebook_id: notebookId,
+              sources: sourceData,
+              callback_url: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/audio-generation-callback`
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Webhook responded with status: ${response.status}`);
+          }
+          
+          return { success: true, message: 'Audio generation started via webhook' };
+        } else {
+          // Fallback à l'Edge Function si le webhook n'est pas configuré
+          const { data, error } = await supabase.functions.invoke('generate-audio-overview', {
+            body: { notebookId }
+          });
 
-        if (error) {
-          console.error('Error starting audio generation:', error);
-          throw error;
+          if (error) {
+            console.error('Error starting audio generation:', error);
+            throw error;
+          }
+
+          return data;
         }
-
-        return data;
       } catch (error) {
         console.error('Failed to start audio generation:', error);
         
