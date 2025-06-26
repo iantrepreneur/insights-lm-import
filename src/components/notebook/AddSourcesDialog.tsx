@@ -467,6 +467,13 @@ const AddSourcesDialog = ({
                   onChange={handleFileSelect}
                   disabled={isProcessingFiles}
                 />
+                <Button 
+                  onClick={() => document.getElementById('file-upload')?.click()} 
+                  disabled={isProcessingFiles}
+                  variant="outline"
+                >
+                  Choisir un fichier
+                </Button>
               </div>
             </div>
 
