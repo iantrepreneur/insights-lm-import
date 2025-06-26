@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { User, LogOut } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { User, LogOut, Globe } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useLogout } from '@/services/authService';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Logo from '@/components/ui/Logo';
 
 interface DashboardHeaderProps {
@@ -12,6 +12,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ userEmail }: DashboardHeaderProps) => {
   const { logout } = useLogout();
+  const { t, language, setLanguage } = useLanguage();
 
   return (
     <header className="bg-white px-6 py-4">
@@ -31,9 +32,14 @@ const DashboardHeader = ({ userEmail }: DashboardHeaderProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')} className="cursor-pointer">
+                <Globe className="h-4 w-4 mr-2" />
+                {language === 'fr' ? 'English' : 'Français'}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="cursor-pointer">
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                {t('signOut')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
