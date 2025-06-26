@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNotebookUpdate } from '@/hooks/useNotebookUpdate';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { useLogout } from '@/services/authService';
 import Logo from '@/components/ui/Logo';
@@ -24,6 +26,7 @@ const NotebookHeader = ({ title, notebookId }: NotebookHeaderProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
   const { updateNotebook, isUpdating } = useNotebookUpdate();
+  const { t, language, setLanguage } = useLanguage();
 
   const handleTitleClick = () => {
     if (notebookId) {
@@ -102,9 +105,14 @@ const NotebookHeader = ({ title, notebookId }: NotebookHeaderProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')} className="cursor-pointer">
+                  <Globe className="h-4 w-4 mr-2" />
+                  {language === 'fr' ? 'English' : 'Français'}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="cursor-pointer">
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {t('signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -1,10 +1,10 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import NotebookCard from './NotebookCard';
 import { Check, Grid3X3, List, ChevronDown } from 'lucide-react';
 import { useNotebooks } from '@/hooks/useNotebooks';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import {
 const NotebookGrid = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('Most recent');
+  const { t } = useLanguage();
   const {
     notebooks,
     isLoading,
@@ -28,9 +29,9 @@ const NotebookGrid = () => {
     
     const sorted = [...notebooks];
     
-    if (sortBy === 'Most recent') {
+    if (sortBy === 'Most recent' || sortBy === 'Plus récent') {
       return sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-    } else if (sortBy === 'Title') {
+    } else if (sortBy === 'Title' || sortBy === 'Titre') {
       return sorted.sort((a, b) => a.title.localeCompare(b.title));
     }
     
@@ -39,7 +40,7 @@ const NotebookGrid = () => {
 
   const handleCreateNotebook = () => {
     createNotebook({
-      title: 'Untitled notebook',
+      title: t('untitledNotebook'),
       description: ''
     }, {
       onSuccess: data => {
@@ -64,15 +65,18 @@ const NotebookGrid = () => {
   };
 
   if (isLoading) {
-    return <div className="text-center py-16">
-        <p className="text-gray-600">Loading notebooks...</p>
-      </div>;
+    return (
+      <div className="text-center py-16">
+        <p className="text-gray-600">{t('loadingNotebooks')}</p>
+      </div>
+    );
   }
 
-  return <div>
+  return (
+    <div>
       <div className="flex items-center justify-between mb-8">
         <Button className="bg-black hover:bg-gray-800 text-white rounded-full px-6" onClick={handleCreateNotebook} disabled={isCreating}>
-          {isCreating ? 'Creating...' : '+ Create new'}
+          {isCreating ? t('creating') : t('createNew')}
         </Button>
         
         <div className="flex items-center space-x-4">
@@ -84,13 +88,13 @@ const NotebookGrid = () => {
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => setSortBy('Most recent')} className="flex items-center justify-between">
-                Most recent
-                {sortBy === 'Most recent' && <Check className="h-4 w-4" />}
+              <DropdownMenuItem onClick={() => setSortBy(t('mostRecent'))} className="flex items-center justify-between">
+                {t('mostRecent')}
+                {(sortBy === 'Most recent' || sortBy === 'Plus récent') && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('Title')} className="flex items-center justify-between">
-                Title
-                {sortBy === 'Title' && <Check className="h-4 w-4" />}
+              <DropdownMenuItem onClick={() => setSortBy(t('title'))} className="flex items-center justify-between">
+                {t('title')}
+                {(sortBy === 'Title' || sortBy === 'Titre') && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -98,22 +102,25 @@ const NotebookGrid = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {sortedNotebooks.map(notebook => <div key={notebook.id} onClick={e => handleNotebookClick(notebook.id, e)}>
+        {sortedNotebooks.map(notebook => (
+          <div key={notebook.id} onClick={e => handleNotebookClick(notebook.id, e)}>
             <NotebookCard notebook={{
-          id: notebook.id,
-          title: notebook.title,
-          date: new Date(notebook.updated_at).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-          }),
-          sources: notebook.sources?.[0]?.count || 0,
-          icon: notebook.icon || '📝',
-          color: notebook.color || 'bg-gray-100'
-        }} />
-          </div>)}
+              id: notebook.id,
+              title: notebook.title,
+              date: new Date(notebook.updated_at).toLocaleDateString('fr-FR', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              }),
+              sources: notebook.sources?.[0]?.count || 0,
+              icon: notebook.icon || '📝',
+              color: notebook.color || 'bg-gray-100'
+            }} />
+          </div>
+        ))}
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default NotebookGrid;

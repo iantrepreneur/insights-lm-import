@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, MessageCircle, NotebookPen } from 'lucide-react';
@@ -6,6 +5,7 @@ import SourcesSidebar from './SourcesSidebar';
 import ChatArea from './ChatArea';
 import StudioSidebar from './StudioSidebar';
 import { Citation } from '@/types/message';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MobileNotebookTabsProps {
   hasSource: boolean;
@@ -33,6 +33,8 @@ const MobileNotebookTabs = ({
   setSelectedCitation,
   onCitationClick
 }: MobileNotebookTabsProps) => {
+  const { t } = useLanguage();
+  
   return (
     <Tabs defaultValue="chat" className="flex-1 flex flex-col overflow-hidden">
       <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 h-12 rounded-none border-b border-gray-200">
@@ -41,21 +43,21 @@ const MobileNotebookTabs = ({
           className="flex items-center space-x-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm"
         >
           <FileText className="h-4 w-4" />
-          <span className="hidden sm:inline">Sources</span>
+          <span className="hidden sm:inline">{t('sources')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="chat" 
           className="flex items-center space-x-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm"
         >
           <MessageCircle className="h-4 w-4" />
-          <span className="hidden sm:inline">Chat</span>
+          <span className="hidden sm:inline">{t('chat')}</span>
         </TabsTrigger>
         <TabsTrigger 
           value="studio" 
           className="flex items-center space-x-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm"
         >
           <NotebookPen className="h-4 w-4" />
-          <span className="hidden sm:inline">Notes</span>
+          <span className="hidden sm:inline">{t('notes')}</span>
         </TabsTrigger>
       </TabsList>
 

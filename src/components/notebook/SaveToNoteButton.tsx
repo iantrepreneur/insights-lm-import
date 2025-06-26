@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
 import { useNotes } from '@/hooks/useNotes';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SaveToNoteButtonProps {
   content: string | { segments: any[]; citations: any[] };
@@ -12,6 +12,7 @@ interface SaveToNoteButtonProps {
 
 const SaveToNoteButton = ({ content, notebookId, onSaved }: SaveToNoteButtonProps) => {
   const { createNote, isCreating } = useNotes(notebookId);
+  const { t } = useLanguage();
 
   const handleSaveToNote = () => {
     if (!notebookId) return;
@@ -34,7 +35,7 @@ const SaveToNoteButton = ({ content, notebookId, onSaved }: SaveToNoteButtonProp
       // For AI responses with citations, save the structured content as JSON
       contentText = JSON.stringify(content);
       // Generate title from the first segment's text
-      const firstSegmentText = content.segments[0]?.text || 'AI Response';
+      const firstSegmentText = content.segments[0]?.text || t('aiResponse');
       title = firstSegmentText.length > 50 ? firstSegmentText.substring(0, 47) + '...' : firstSegmentText;
       source_type = 'ai_response';
       
@@ -73,7 +74,7 @@ const SaveToNoteButton = ({ content, notebookId, onSaved }: SaveToNoteButtonProp
       className="flex items-center space-x-1 text-gray-600 hover:text-gray-800"
     >
       <FileText className="h-3 w-3" />
-      <span className="text-xs">{isCreating ? 'Saving...' : 'Save to note'}</span>
+      <span className="text-xs">{isCreating ? t('saving') : t('saveToNote')}</span>
     </Button>
   );
 };

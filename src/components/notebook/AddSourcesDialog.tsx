@@ -10,6 +10,7 @@ import { useDocumentProcessing } from '@/hooks/useDocumentProcessing';
 import { useNotebookGeneration } from '@/hooks/useNotebookGeneration';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AddSourcesDialogProps {
   open: boolean;
@@ -26,6 +27,7 @@ const AddSourcesDialog = ({
   const [showCopiedTextDialog, setShowCopiedTextDialog] = useState(false);
   const [showMultipleWebsiteDialog, setShowMultipleWebsiteDialog] = useState(false);
   const [isLocallyProcessing, setIsLocallyProcessing] = useState(false);
+  const { t } = useLanguage();
 
   const {
     addSourceAsync,
@@ -157,8 +159,8 @@ const AddSourcesDialog = ({
   const handleFileUpload = async (files: File[]) => {
     if (!notebookId) {
       toast({
-        title: "Error",
-        description: "No notebook selected",
+        title: t('error'),
+        description: t('noNotebookSelected'),
         variant: "destructive"
       });
       return;
@@ -225,8 +227,8 @@ const AddSourcesDialog = ({
 
       // Step 4: Show success toast
       toast({
-        title: "Files Added",
-        description: `${files.length} file${files.length > 1 ? 's' : ''} added and processing started`
+        title: t('filesAdded'),
+        description: `${files.length} ${files.length > 1 ? t('filesAddedProcessing') : t('fileAddedProcessing')}`
       });
 
       // Step 5: Process files in parallel (background)
@@ -244,8 +246,8 @@ const AddSourcesDialog = ({
 
         if (failed > 0) {
           toast({
-            title: "Processing Issues",
-            description: `${failed} file${failed > 1 ? 's' : ''} had processing issues. Check the sources list for details.`,
+            title: t('processingIssues'),
+            description: `${failed} ${failed > 1 ? t('filesHadIssues') : t('fileHadIssues')}`,
             variant: "destructive"
           });
         }
@@ -254,8 +256,8 @@ const AddSourcesDialog = ({
       console.error('Error creating sources:', error);
       setIsLocallyProcessing(false);
       toast({
-        title: "Error",
-        description: "Failed to add files. Please try again.",
+        title: t('error'),
+        description: t('failedToAddFiles'),
         variant: "destructive"
       });
     }
@@ -296,14 +298,14 @@ const AddSourcesDialog = ({
       }
 
       toast({
-        title: "Success",
-        description: "Text has been added and sent for processing"
+        title: t('success'),
+        description: t('textAddedProcessing')
       });
     } catch (error) {
       console.error('Error adding text source:', error);
       toast({
-        title: "Error",
-        description: "Failed to add text source",
+        title: t('error'),
+        description: t('failedToAddTextSource'),
         variant: "destructive"
       });
     } finally {
@@ -379,16 +381,16 @@ const AddSourcesDialog = ({
       }
 
       toast({
-        title: "Success",
-        description: `${urls.length} website${urls.length > 1 ? 's' : ''} added and sent for processing`
+        title: t('success'),
+        description: `${urls.length} ${urls.length > 1 ? t('websitesAddedProcessing') : t('websiteAddedProcessing')}`
       });
 
       onOpenChange(false);
     } catch (error) {
       console.error('Error adding multiple websites:', error);
       toast({
-        title: "Error",
-        description: "Failed to add websites",
+        title: t('error'),
+        description: t('failedToAddWebsites'),
         variant: "destructive"
       });
     } finally {
@@ -418,10 +420,10 @@ const AddSourcesDialog = ({
 
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-medium mb-2">Add sources</h2>
-              <p className="text-gray-600 text-sm mb-1">Sources let InsightsLM base its responses on the information that matters most to you.</p>
+              <h2 className="text-xl font-medium mb-2">{t('addSources')}</h2>
+              <p className="text-gray-600 text-sm mb-1">{t('sourcesLetInsights')}</p>
               <p className="text-gray-500 text-xs">
-                (Examples: marketing plans, course reading, research notes, meeting transcripts, sales documents, etc.)
+                {t('examplesMarketing')}
               </p>
             </div>
 
@@ -441,28 +443,20 @@ const AddSourcesDialog = ({
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">
-                    {isProcessingFiles ? 'Processing files...' : 'Upload sources'}
+                    {isProcessingFiles ? t('processingFiles') : t('uploadSources')}
                   </h3>
                   <p className="text-gray-600 text-sm">
                     {isProcessingFiles ? (
-                      'Please wait while we process your files'
+                      t('pleaseWaitProcessing')
                     ) : (
                       <>
-                        Drag & drop or{' '}
-                        <button 
-                          className="text-blue-600 hover:underline" 
-                          onClick={() => document.getElementById('file-upload')?.click()}
-                          disabled={isProcessingFiles}
-                        >
-                          choose file
-                        </button>{' '}
-                        to upload
+                        {t('dragDropChoose')}
                       </>
                     )}
                   </p>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Supported file types: PDF, txt, Markdown, Audio (e.g. mp3)
+                  {t('supportedFileTypes')}
                 </p>
                 <input
                   id="file-upload"
@@ -485,8 +479,8 @@ const AddSourcesDialog = ({
                 disabled={isProcessingFiles}
               >
                 <Link className="h-6 w-6 text-green-600" />
-                <span className="font-medium">Link - Website</span>
-                <span className="text-sm text-gray-500">Multiple URLs at once</span>
+                <span className="font-medium">{t('linkWebsite')}</span>
+                <span className="text-sm text-gray-500">{t('multipleURLsAtOnce')}</span>
               </Button>
 
               <Button
@@ -496,8 +490,8 @@ const AddSourcesDialog = ({
                 disabled={isProcessingFiles}
               >
                 <Copy className="h-6 w-6 text-purple-600" />
-                <span className="font-medium">Paste Text - Copied Text</span>
-                <span className="text-sm text-gray-500">Add copied content</span>
+                <span className="font-medium">{t('pasteTextCopiedText')}</span>
+                <span className="text-sm text-gray-500">{t('addCopiedContent')}</span>
               </Button>
             </div>
           </div>

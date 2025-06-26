@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useNotebookDelete } from '@/hooks/useNotebookDelete';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NotebookCardProps {
   notebook: {
@@ -19,6 +20,7 @@ const NotebookCard = ({
   notebook
 }: NotebookCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { t } = useLanguage();
   const {
     deleteNotebook,
     isDeleting
@@ -44,7 +46,8 @@ const NotebookCard = ({
   const backgroundClass = `bg-${colorName}-100`;
   const borderClass = `border-${colorName}-200`;
 
-  return <div 
+  return (
+    <div 
       className={`rounded-lg border ${borderClass} ${backgroundClass} p-4 hover:shadow-md transition-shadow cursor-pointer relative h-48 flex flex-col`}
     >
       <div className="absolute top-3 right-3" data-delete-action="true">
@@ -56,15 +59,15 @@ const NotebookCard = ({
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete this notebook?</AlertDialogTitle>
+              <AlertDialogTitle>{t('deleteThisNotebook')}</AlertDialogTitle>
               <AlertDialogDescription>
-                You're about to delete this notebook and all of its content. This cannot be undone.
+                {t('deleteNotebookConfirmation')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={handleConfirmDelete} className="bg-blue-600 hover:bg-blue-700" disabled={isDeleting}>
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? t('deleting') : t('delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -80,9 +83,10 @@ const NotebookCard = ({
       </h3>
       
       <div className="flex items-center justify-between text-sm text-gray-500 mt-auto">
-        <span>{notebook.date} • {notebook.sources} source{notebook.sources !== 1 ? 's' : ''}</span>
+        <span>{notebook.date} • {notebook.sources} {notebook.sources !== 1 ? t('sources') : t('source')}</span>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default NotebookCard;
