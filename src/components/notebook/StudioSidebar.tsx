@@ -69,13 +69,16 @@ const StudioSidebar = ({
     
     const checkFfmpeg = async () => {
       try {
-        const { data, error } = await fetch('/api/check-ffmpeg').then(res => res.json());
-        if (error) {
-          console.error('Error checking FFMPEG:', error);
+        const response = await fetch('/api/check-ffmpeg');
+        const result = await response.json();
+        
+        if (result.error) {
+          console.log('FFMPEG check result:', result.error);
           setFfmpegInstalled(false);
           return;
         }
-        setFfmpegInstalled(data?.installed || false);
+        
+        setFfmpegInstalled(result.installed || false);
       } catch (error) {
         console.error('Failed to check FFMPEG:', error);
         setFfmpegInstalled(false);
