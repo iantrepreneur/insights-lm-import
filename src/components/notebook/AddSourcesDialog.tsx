@@ -139,8 +139,7 @@ const AddSourcesDialog = ({
         updateSource({
           sourceId,
           updates: {
-            processing_status: 'completed',
-            content: `Contenu automatique pour ${file.name}. Le traitement du document a échoué, mais vous pouvez quand même utiliser ce document.`
+            processing_status: 'completed'
           }
         });
       }
@@ -459,16 +458,6 @@ const AddSourcesDialog = ({
                 <p className="text-xs text-gray-500">
                   {t('supportedFileTypes')}
                 </p>
-                <label htmlFor="file-upload" className="cursor-pointer">
-                  <Button 
-                    variant="outline" 
-                    disabled={isProcessingFiles}
-                    onClick={() => document.getElementById('file-upload')?.click()}
-                    className="bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    Choisir un fichier
-                  </Button>
-                </label>
                 <input
                   id="file-upload"
                   type="file"

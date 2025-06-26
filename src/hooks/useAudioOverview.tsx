@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -63,100 +64,19 @@ export const useAudioOverview = (notebookId?: string) => {
       setIsGenerating(true);
       setGenerationStatus('generating');
       
-      try {
-        // Mettre à jour directement le statut dans la base de données
-        const { error: updateError } = await supabase
-          .from('notebooks')
-          .update({
-            audio_overview_generation_status: 'generating'
-          })
-          .eq('id', notebookId);
-          
-        if (updateError) {
-          console.error('Error updating notebook status:', updateError);
-          throw updateError;
-        }
-        
-        // Appeler directement le webhook n8n au lieu de passer par l'Edge Function
-        const audioGenerationWebhookUrl = Deno.env.get('AUDIO_GENERATION_WEBHOOK_URL') || 
-                                         import.meta.env.VITE_AUDIO_GENERATION_WEBHOOK_URL;
-        const authHeader = Deno.env.get('NOTEBOOK_GENERATION_AUTH') || 
-                          import.meta.env.VITE_NOTEBOOK_GENERATION_AUTH;
-                          
-        if (audioGenerationWebhookUrl) {
-          console.log('Calling audio generation webhook directly:', audioGenerationWebhookUrl);
-          
-          // Récupérer les sources du notebook
-          const { data: sources } = await supabase
-            .from('sources')
-            .select('id, title, content, summary')
-            .eq('notebook_id', notebookId)
-            .eq('processing_status', 'completed');
-            
-          const sourceData = sources?.map(source => ({
-            title: source.title,
-            content: source.content || '',
-            summary: source.summary || ''
-          })) || [];
-          
-          // Appeler le webhook directement
-          const response = await fetch(audioGenerationWebhookUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': authHeader || '',
-            },
-            body: JSON.stringify({
-              notebook_id: notebookId,
-              sources: sourceData,
-              callback_url: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/audio-generation-callback`
-            })
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Webhook responded with status: ${response.status}`);
-          }
-          
-          return { success: true, message: 'Audio generation started via webhook' };
-        } else {
-          // Fallback à l'Edge Function si le webhook n'est pas configuré
-          const { data, error } = await supabase.functions.invoke('generate-audio-overview', {
-            body: { notebookId }
-          });
+      const { data, error } = await supabase.functions.invoke('generate-audio-overview', {
+        body: { notebookId }
+      });
 
-          if (error) {
-            console.error('Error starting audio generation:', error);
-            throw error;
-          }
-
-          return data;
-        }
-      } catch (error) {
-        console.error('Failed to start audio generation:', error);
-        
-        // En cas d'erreur, on met à jour le statut pour éviter de bloquer l'interface
-        const { error: updateError } = await supabase
-          .from('notebooks')
-          .update({
-            audio_overview_generation_status: 'failed'
-          })
-          .eq('id', notebookId);
-          
-        if (updateError) {
-          console.error('Error updating notebook status after failure:', updateError);
-        }
-        
+      if (error) {
+        console.error('Error starting audio generation:', error);
         throw error;
       }
+
+      return data;
     },
     onSuccess: (data, notebookId) => {
       console.log('Audio generation started successfully:', data);
-      
-      // Afficher un toast pour informer l'utilisateur
-      toast({
-        title: "Génération audio démarrée",
-        description: "La génération de l'aperçu audio a commencé. Cela peut prendre quelques minutes.",
-      });
     },
     onError: (error) => {
       console.error('Audio generation failed to start:', error);
@@ -172,8 +92,10 @@ export const useAudioOverview = (notebookId?: string) => {
   });
 
   const refreshAudioUrl = useMutation({
-    mutationFn: async (notebookId: string) => {
-      setIsAutoRefreshing(true);
+    mutationFn: async ({ notebookId, silent = false }: { notebookId: string; silent?: boolean }) => {
+      if (!silent) {
+        setIsAutoRefreshing(true);
+      }
 
       const { data, error } = await supabase.functions.invoke('refresh-audio-url', {
         body: { notebookId }
@@ -186,26 +108,25 @@ export const useAudioOverview = (notebookId?: string) => {
 
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       console.log('Audio URL refreshed successfully:', data);
       // Invalidate queries to refresh the UI with new URL
       queryClient.invalidateQueries({ queryKey: ['notebooks'] });
       
-      setIsAutoRefreshing(false);
-      
-      toast({
-        title: "URL Audio Actualisée",
-        description: "L'URL de l'audio a été actualisée avec succès.",
-      });
+      if (!variables.silent) {
+        setIsAutoRefreshing(false);
+      }
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       console.error('Failed to refresh audio URL:', error);
-      setIsAutoRefreshing(false);
-      toast({
-        title: "Failed to Refresh URL",
-        description: "Unable to refresh the audio URL. Please try again.",
-        variant: "destructive",
-      });
+      if (!variables.silent) {
+        setIsAutoRefreshing(false);
+        toast({
+          title: "Failed to Refresh URL",
+          description: "Unable to refresh the audio URL. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   });
 
@@ -218,7 +139,7 @@ export const useAudioOverview = (notebookId?: string) => {
     if (checkAudioExpiry(expiresAt) && !isAutoRefreshing && !refreshAudioUrl.isPending) {
       console.log('Audio URL expired, auto-refreshing...');
       try {
-        await refreshAudioUrl.mutateAsync(notebookId);
+        await refreshAudioUrl.mutateAsync({ notebookId, silent: true });
       } catch (error) {
         console.error('Auto-refresh failed:', error);
       }
@@ -227,7 +148,7 @@ export const useAudioOverview = (notebookId?: string) => {
 
   return {
     generateAudioOverview: generateAudioOverview.mutate,
-    refreshAudioUrl: refreshAudioUrl.mutate,
+    refreshAudioUrl: (notebookId: string) => refreshAudioUrl.mutate({ notebookId }),
     autoRefreshIfExpired,
     isGenerating: isGenerating || generateAudioOverview.isPending,
     isAutoRefreshing,

@@ -30,7 +30,6 @@ const StudioSidebar = ({
   const ffmpegChecked = useRef(false);
   const { t } = useLanguage();
   const { toast } = useToast();
-  
   const {
     notes,
     isLoading,
@@ -41,15 +40,12 @@ const StudioSidebar = ({
     isUpdating,
     isDeleting
   } = useNotes(notebookId);
-  
   const {
     notebooks
   } = useNotebooks();
-  
   const {
     sources
   } = useSources(notebookId);
-  
   const {
     generateAudioOverview,
     refreshAudioUrl,
@@ -59,7 +55,6 @@ const StudioSidebar = ({
     generationStatus,
     checkAudioExpiry
   } = useAudioOverview(notebookId);
-  
   const queryClient = useQueryClient();
   const notebook = notebooks?.find(n => n.id === notebookId);
   const hasValidAudio = notebook?.audio_overview_url && !checkAudioExpiry(notebook.audio_url_expires_at);
@@ -74,40 +69,16 @@ const StudioSidebar = ({
     
     const checkFfmpeg = async () => {
       try {
-        // Essayer d'abord l'API locale
-        try {
-          const response = await fetch('/api/check-ffmpeg');
-          const data = await response.json();
-          if (data && typeof data.installed === 'boolean') {
-            console.log('FFMPEG check via local API:', data);
-            setFfmpegInstalled(data.installed);
-            ffmpegChecked.current = true;
-            return;
-          }
-        } catch (localError) {
-          console.log('Local FFMPEG check failed, trying Edge Function:', localError);
-        }
-        
-        // Fallback à l'Edge Function Supabase
-        const { data, error } = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-ffmpeg`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json'
-          }
-        }).then(res => res.json());
-        
+        const { data, error } = await fetch('/api/check-ffmpeg').then(res => res.json());
         if (error) {
-          console.log('FFMPEG check error:', error);
+          console.error('Error checking FFMPEG:', error);
           setFfmpegInstalled(false);
           return;
         }
-        
-        setFfmpegInstalled(data?.installed || true);
+        setFfmpegInstalled(data?.installed || false);
       } catch (error) {
         console.error('Failed to check FFMPEG:', error);
-        // Par défaut, on suppose que FFMPEG est installé pour ne pas bloquer l'utilisateur
-        setFfmpegInstalled(true);
+        setFfmpegInstalled(false);
       }
       ffmpegChecked.current = true;
     };
