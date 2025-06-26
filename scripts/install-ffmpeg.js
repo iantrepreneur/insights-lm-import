@@ -1,7 +1,7 @@
-import { exec } from 'child_process';
-import os from 'os';
-import fs from 'fs';
-import path from 'path';
+const { exec } = require('child_process');
+const os = require('os');
+const fs = require('fs');
+const path = require('path');
 
 console.log('Checking operating system...');
 const platform = os.platform();

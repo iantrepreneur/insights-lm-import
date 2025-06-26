@@ -3,11 +3,11 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import fs from 'fs';
-import { exec } from 'child_process';
 
 // Middleware pour simuler l'API de vérification FFMPEG
 const checkFfmpegMiddleware = (req, res, next) => {
   if (req.url === '/api/check-ffmpeg') {
+    const { exec } = require('child_process');
     exec('ffmpeg -version', (error, stdout, stderr) => {
       if (error) {
         res.setHeader('Content-Type', 'application/json');
