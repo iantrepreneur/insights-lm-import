@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -57,7 +56,31 @@ serve(async (req) => {
     EdgeRuntime.waitUntil(
       (async () => {
         try {
-          // Call the external audio generation webhook
+          // Récupérer les sources du notebook pour les envoyer au webhook
+          const { data: sources, error: sourcesError } = await supabase
+            .from('sources')
+            .select('id, title, content, summary')
+            .eq('notebook_id', notebookId)
+            .eq('processing_status', 'completed');
+            
+          if (sourcesError) {
+            console.error('Error fetching sources:', sourcesError);
+            throw sourcesError;
+          }
+          
+          if (!sources || sources.length === 0) {
+            console.error('No completed sources found for notebook:', notebookId);
+            throw new Error('No completed sources found');
+          }
+          
+          // Préparer les données des sources pour le webhook
+          const sourceData = sources.map(source => ({
+            title: source.title,
+            content: source.content || '',
+            summary: source.summary || ''
+          }));
+
+          // Call the external audio generation webhook with source data
           const audioResponse = await fetch(audioGenerationWebhookUrl, {
             method: 'POST',
             headers: {
@@ -66,6 +89,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({
               notebook_id: notebookId,
+              sources: sourceData,
               callback_url: `${supabaseUrl}/functions/v1/audio-generation-callback`
             })
           })
