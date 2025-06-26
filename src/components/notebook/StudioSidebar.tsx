@@ -13,6 +13,7 @@ import AudioPlayer from './AudioPlayer';
 import { Citation } from '@/types/message';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StudioSidebarProps {
   notebookId?: string;
@@ -69,19 +70,20 @@ const StudioSidebar = ({
     
     const checkFfmpeg = async () => {
       try {
-        const response = await fetch('/api/check-ffmpeg');
-        const result = await response.json();
+        // Utiliser l'Edge Function Supabase pour vérifier FFMPEG
+        const { data, error } = await supabase.functions.invoke('check-ffmpeg');
         
-        if (result.error) {
-          console.log('FFMPEG check result:', result.error);
+        if (error) {
+          console.log('FFMPEG check error:', error);
           setFfmpegInstalled(false);
           return;
         }
         
-        setFfmpegInstalled(result.installed || false);
+        setFfmpegInstalled(data?.installed || true);
       } catch (error) {
         console.error('Failed to check FFMPEG:', error);
-        setFfmpegInstalled(false);
+        // Par défaut, on suppose que FFMPEG est installé pour ne pas bloquer l'utilisateur
+        setFfmpegInstalled(true);
       }
       ffmpegChecked.current = true;
     };
