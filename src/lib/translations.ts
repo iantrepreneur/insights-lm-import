@@ -157,6 +157,8 @@ export const translations = {
     uploadSource: "Upload a source",
     deleteNotebook: "Delete notebook",
     deleteSource: "Delete source",
+    ffmpegNotInstalled: "FFMPEG is not installed",
+    ffmpegRequired: "FFMPEG is required for audio generation. Please install it on your server.",
   },
   fr: {
     // Auth
@@ -316,6 +318,8 @@ export const translations = {
     uploadSource: "Télécharger une source",
     deleteNotebook: "Supprimer le carnet",
     deleteSource: "Supprimer la source",
+    ffmpegNotInstalled: "FFMPEG n'est pas installé",
+    ffmpegRequired: "FFMPEG est nécessaire pour la génération audio. Veuillez l'installer sur votre serveur.",
   }
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,22 +12,24 @@ import NoteEditor from './NoteEditor';
 import AudioPlayer from './AudioPlayer';
 import { Citation } from '@/types/message';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface StudioSidebarProps {
   notebookId?: string;
-  isExpanded?: boolean;
   onCitationClick?: (citation: Citation) => void;
 }
 
 const StudioSidebar = ({
   notebookId,
-  isExpanded,
   onCitationClick
 }: StudioSidebarProps) => {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [audioError, setAudioError] = useState(false);
+  const [ffmpegInstalled, setFfmpegInstalled] = useState<boolean | null>(null);
+  const ffmpegChecked = useRef(false);
   const { t } = useLanguage();
+  const { toast } = useToast();
   const {
     notes,
     isLoading,
@@ -60,6 +62,29 @@ const StudioSidebar = ({
   
   // Check if at least one source has been successfully processed
   const hasProcessedSource = sources?.some(source => source.processing_status === 'completed') || false;
+
+  // Check if FFMPEG is installed
+  useEffect(() => {
+    if (ffmpegChecked.current) return;
+    
+    const checkFfmpeg = async () => {
+      try {
+        const { data, error } = await fetch('/api/check-ffmpeg').then(res => res.json());
+        if (error) {
+          console.error('Error checking FFMPEG:', error);
+          setFfmpegInstalled(false);
+          return;
+        }
+        setFfmpegInstalled(data?.installed || false);
+      } catch (error) {
+        console.error('Failed to check FFMPEG:', error);
+        setFfmpegInstalled(false);
+      }
+      ffmpegChecked.current = true;
+    };
+    
+    checkFfmpeg();
+  }, []);
 
   // Auto-refresh expired URLs
   useEffect(() => {
@@ -129,6 +154,15 @@ const StudioSidebar = ({
   };
 
   const handleGenerateAudio = () => {
+    if (!ffmpegInstalled) {
+      toast({
+        title: t('error'),
+        description: t('ffmpegNotInstalled'),
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (notebookId) {
       generateAudioOverview(notebookId);
       setAudioError(false);
@@ -271,8 +305,24 @@ const StudioSidebar = ({
                   </Button>
                 </div>}
               
+              {/* FFMPEG not installed warning */}
+              {ffmpegInstalled === false && (
+                <div className="flex items-center space-x-2 mb-3 p-2 bg-amber-50 rounded-md">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <div className="flex-1">
+                    <p className="text-sm text-amber-600">{t('ffmpegNotInstalled')}</p>
+                    <p className="text-xs text-amber-600">{t('ffmpegRequired')}</p>
+                  </div>
+                </div>
+              )}
+              
               <div className="flex space-x-2">
-                <Button size="sm" onClick={handleGenerateAudio} disabled={isGenerating || currentStatus === 'generating' || !hasProcessedSource || isAutoRefreshing} className="flex-1 text-white bg-slate-900 hover:bg-slate-800">
+                <Button 
+                  size="sm" 
+                  onClick={handleGenerateAudio} 
+                  disabled={isGenerating || currentStatus === 'generating' || !hasProcessedSource || isAutoRefreshing || ffmpegInstalled === false} 
+                  className="flex-1 text-white bg-slate-900 hover:bg-slate-800"
+                >
                   {isGenerating || currentStatus === 'generating' ? <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       {t('generating')}
