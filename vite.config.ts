@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    middlewareMode: false,
+    middlewareMode: false
   },
   plugins: [
     react(),
