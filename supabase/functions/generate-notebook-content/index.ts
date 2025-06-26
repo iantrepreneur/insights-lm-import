@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -34,9 +33,40 @@ serve(async (req) => {
         hasAuth: !!authHeader
       })
       
+      // Fallback: Generate a simple title and description
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      )
+      
+      // Update notebook with fallback content
+      const { error: notebookError } = await supabaseClient
+        .from('notebooks')
+        .update({
+          title: `Carnet ${new Date().toLocaleDateString('fr-FR')}`,
+          description: "Contenu généré automatiquement. Ajoutez plus de sources pour enrichir ce carnet.",
+          icon: '📝',
+          color: 'gray',
+          example_questions: ["Que contient ce document?", "Peux-tu résumer ce document?", "Quels sont les points clés?"],
+          generation_status: 'completed'
+        })
+        .eq('id', notebookId)
+      
+      if (notebookError) {
+        console.error('Fallback notebook update error:', notebookError)
+        return new Response(
+          JSON.stringify({ error: 'Failed to update notebook with fallback content' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
       return new Response(
-        JSON.stringify({ error: 'Web service configuration missing' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          success: true, 
+          message: 'Fallback notebook content generated successfully',
+          warning: 'Web service configuration missing, using fallback content'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -77,110 +107,143 @@ serve(async (req) => {
 
     console.log('Sending payload to web service:', payload);
 
-    // Call external web service
-    const response = await fetch(webServiceUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': authHeader,
-      },
-      body: JSON.stringify(payload)
-    })
-
-    if (!response.ok) {
-      console.error('Web service error:', response.status, response.statusText)
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      
-      // Update status to failed
-      await supabaseClient
-        .from('notebooks')
-        .update({ generation_status: 'failed' })
-        .eq('id', notebookId)
-
-      return new Response(
-        JSON.stringify({ error: 'Failed to generate content from web service' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const generatedData = await response.json()
-    console.log('Generated data:', generatedData)
-
-    // Parse the response format: object with output property
-    let title, description, notebookIcon, backgroundColor, exampleQuestions;
-    
-    if (generatedData && generatedData.output) {
-      const output = generatedData.output;
-      title = output.title;
-      description = output.summary;
-      notebookIcon = output.notebook_icon;
-      backgroundColor = output.background_color;
-      exampleQuestions = output.example_questions || [];
-    } else {
-      console.error('Unexpected response format:', generatedData)
-      
-      await supabaseClient
-        .from('notebooks')
-        .update({ generation_status: 'failed' })
-        .eq('id', notebookId)
-
-      return new Response(
-        JSON.stringify({ error: 'Invalid response format from web service' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    if (!title) {
-      console.error('No title returned from web service')
-      
-      await supabaseClient
-        .from('notebooks')
-        .update({ generation_status: 'failed' })
-        .eq('id', notebookId)
-
-      return new Response(
-        JSON.stringify({ error: 'No title in response from web service' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Update notebook with generated content including icon, color, and example questions
-    const { error: notebookError } = await supabaseClient
-      .from('notebooks')
-      .update({
-        title: title,
-        description: description || null,
-        icon: notebookIcon || '📝',
-        color: backgroundColor || 'bg-gray-100',
-        example_questions: exampleQuestions || [],
-        generation_status: 'completed'
+    try {
+      // Call external web service
+      const response = await fetch(webServiceUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader,
+        },
+        body: JSON.stringify(payload)
       })
-      .eq('id', notebookId)
 
-    if (notebookError) {
-      console.error('Notebook update error:', notebookError)
+      if (!response.ok) {
+        console.error('Web service error:', response.status, response.statusText)
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        
+        // Update status to failed
+        await supabaseClient
+          .from('notebooks')
+          .update({ generation_status: 'failed' })
+          .eq('id', notebookId)
+
+        return new Response(
+          JSON.stringify({ error: 'Failed to generate content from web service' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      const generatedData = await response.json()
+      console.log('Generated data:', generatedData)
+
+      // Parse the response format: object with output property
+      let title, description, notebookIcon, backgroundColor, exampleQuestions;
+      
+      if (generatedData && generatedData.output) {
+        const output = generatedData.output;
+        title = output.title;
+        description = output.summary;
+        notebookIcon = output.notebook_icon;
+        backgroundColor = output.background_color;
+        exampleQuestions = output.example_questions || [];
+      } else {
+        console.error('Unexpected response format:', generatedData)
+        
+        await supabaseClient
+          .from('notebooks')
+          .update({ generation_status: 'failed' })
+          .eq('id', notebookId)
+
+        return new Response(
+          JSON.stringify({ error: 'Invalid response format from web service' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      if (!title) {
+        console.error('No title returned from web service')
+        
+        await supabaseClient
+          .from('notebooks')
+          .update({ generation_status: 'failed' })
+          .eq('id', notebookId)
+
+        return new Response(
+          JSON.stringify({ error: 'No title in response from web service' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Update notebook with generated content including icon, color, and example questions
+      const { error: notebookError } = await supabaseClient
+        .from('notebooks')
+        .update({
+          title: title,
+          description: description || null,
+          icon: notebookIcon || '📝',
+          color: backgroundColor || 'bg-gray-100',
+          example_questions: exampleQuestions || [],
+          generation_status: 'completed'
+        })
+        .eq('id', notebookId)
+
+      if (notebookError) {
+        console.error('Notebook update error:', notebookError)
+        return new Response(
+          JSON.stringify({ error: 'Failed to update notebook' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      console.log('Successfully updated notebook with example questions:', exampleQuestions)
+
       return new Response(
-        JSON.stringify({ error: 'Failed to update notebook' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          success: true, 
+          title, 
+          description,
+          icon: notebookIcon,
+          color: backgroundColor,
+          exampleQuestions,
+          message: 'Notebook content generated successfully' 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } catch (fetchError) {
+      console.error('Fetch error:', fetchError);
+      
+      // Fallback: Generate a simple title and description
+      const { error: notebookError } = await supabaseClient
+        .from('notebooks')
+        .update({
+          title: `Carnet ${new Date().toLocaleDateString('fr-FR')}`,
+          description: "Contenu généré automatiquement. Ajoutez plus de sources pour enrichir ce carnet.",
+          icon: '📝',
+          color: 'gray',
+          example_questions: ["Que contient ce document?", "Peux-tu résumer ce document?", "Quels sont les points clés?"],
+          generation_status: 'completed'
+        })
+        .eq('id', notebookId)
+      
+      if (notebookError) {
+        console.error('Fallback notebook update error:', notebookError)
+        return new Response(
+          JSON.stringify({ error: 'Failed to update notebook with fallback content' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Fallback notebook content generated successfully',
+          warning: 'Web service call failed, using fallback content'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    console.log('Successfully updated notebook with example questions:', exampleQuestions)
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        title, 
-        description,
-        icon: notebookIcon,
-        color: backgroundColor,
-        exampleQuestions,
-        message: 'Notebook content generated successfully' 
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-
   } catch (error) {
     console.error('Edge function error:', error)
     return new Response(

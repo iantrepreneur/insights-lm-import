@@ -13,7 +13,6 @@ import AudioPlayer from './AudioPlayer';
 import { Citation } from '@/types/message';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface StudioSidebarProps {
   notebookId?: string;
@@ -70,8 +69,28 @@ const StudioSidebar = ({
     
     const checkFfmpeg = async () => {
       try {
-        // Utiliser l'Edge Function Supabase pour vérifier FFMPEG
-        const { data, error } = await supabase.functions.invoke('check-ffmpeg');
+        // Essayer d'abord l'API locale
+        try {
+          const response = await fetch('/api/check-ffmpeg');
+          const data = await response.json();
+          if (data && typeof data.installed === 'boolean') {
+            console.log('FFMPEG check via local API:', data);
+            setFfmpegInstalled(data.installed);
+            ffmpegChecked.current = true;
+            return;
+          }
+        } catch (localError) {
+          console.log('Local FFMPEG check failed, trying Edge Function:', localError);
+        }
+        
+        // Fallback à l'Edge Function Supabase
+        const { data, error } = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-ffmpeg`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }).then(res => res.json());
         
         if (error) {
           console.log('FFMPEG check error:', error);
