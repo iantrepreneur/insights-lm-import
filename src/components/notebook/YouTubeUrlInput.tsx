@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Youtube } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface YouTubeUrlInputProps {
   open: boolean;
@@ -20,6 +20,7 @@ interface YouTubeUrlInputProps {
 const YouTubeUrlInput = ({ open, onOpenChange, onSubmit }: YouTubeUrlInputProps) => {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,13 +44,13 @@ const YouTubeUrlInput = ({ open, onOpenChange, onSubmit }: YouTubeUrlInputProps)
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Youtube className="h-5 w-5 text-red-600" />
-            <span>Add YouTube Video</span>
+            <span>Ajouter une vidéo YouTube</span>
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="youtube-url">YouTube URL</Label>
+            <Label htmlFor="youtube-url">URL YouTube</Label>
             <Input
               id="youtube-url"
               type="url"
@@ -59,7 +60,7 @@ const YouTubeUrlInput = ({ open, onOpenChange, onSubmit }: YouTubeUrlInputProps)
               required
             />
             <p className="text-xs text-gray-500">
-              Paste the full YouTube video URL
+              Collez l'URL complète de la vidéo YouTube
             </p>
           </div>
 
@@ -70,14 +71,14 @@ const YouTubeUrlInput = ({ open, onOpenChange, onSubmit }: YouTubeUrlInputProps)
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
               className="flex-1"
               disabled={!url.trim() || isLoading}
             >
-              {isLoading ? 'Adding...' : 'Add Source'}
+              {isLoading ? 'Ajout en cours...' : 'Ajouter la source'}
             </Button>
           </div>
         </form>

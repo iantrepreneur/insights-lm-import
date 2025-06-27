@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Copy, ClipboardPaste } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CopiedTextDialogProps {
   open: boolean;
@@ -21,6 +21,7 @@ const CopiedTextDialog = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useLanguage();
 
   // Auto-populate with clipboard content when dialog opens
   useEffect(() => {
@@ -88,24 +89,24 @@ const CopiedTextDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Copy className="h-5 w-5 text-purple-600" />
-            <span>Add Copied Text</span>
+            <span>Ajouter du texte copié</span>
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
             <p className="text-sm text-gray-600 mb-4">
-              This dialog automatically reads from your clipboard. You can also manually paste content below.
+              Ce dialogue lit automatiquement depuis votre presse-papiers. Vous pouvez également coller manuellement du contenu ci-dessous.
             </p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="title" className="text-sm font-medium">
-              Title
+              Titre
             </Label>
             <Input
               id="title"
-              placeholder="Enter a title for this content..."
+              placeholder="Entrez un titre pour ce contenu..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -114,7 +115,7 @@ const CopiedTextDialog = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="content" className="text-sm font-medium">
-                Content
+                Contenu
               </Label>
               <Button
                 variant="outline"
@@ -123,33 +124,33 @@ const CopiedTextDialog = ({
                 className="flex items-center space-x-1"
               >
                 <ClipboardPaste className="h-4 w-4" />
-                <span>Paste from Clipboard</span>
+                <span>Coller depuis le presse-papiers</span>
               </Button>
             </div>
             <Textarea
               id="content"
-              placeholder="Your copied content will appear here..."
+              placeholder="Votre contenu copié apparaîtra ici..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="min-h-[200px] resize-y"
             />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>{characterCount} characters</span>
+              <span>{characterCount} caractères</span>
               {characterCount > 10000 && (
-                <span className="text-amber-600">Large content may take longer to process</span>
+                <span className="text-amber-600">Un contenu volumineux peut prendre plus de temps à traiter</span>
               )}
             </div>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button variant="outline" onClick={handleClose}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button 
               onClick={handleSubmit} 
               disabled={!isValid || isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 'Add Copied Text'}
+              {isSubmitting ? 'Ajout en cours...' : 'Ajouter le texte copié'}
             </Button>
           </div>
         </div>

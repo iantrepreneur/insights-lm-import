@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Globe } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface WebsiteUrlInputProps {
   open: boolean;
@@ -20,6 +20,7 @@ interface WebsiteUrlInputProps {
 const WebsiteUrlInput = ({ open, onOpenChange, onSubmit }: WebsiteUrlInputProps) => {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,23 +44,23 @@ const WebsiteUrlInput = ({ open, onOpenChange, onSubmit }: WebsiteUrlInputProps)
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Globe className="h-5 w-5 text-blue-600" />
-            <span>Add Website</span>
+            <span>Ajouter un site web</span>
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="website-url">Website URL</Label>
+            <Label htmlFor="website-url">URL du site web</Label>
             <Input
               id="website-url"
               type="url"
-              placeholder="https://example.com"
+              placeholder="https://exemple.com"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               required
             />
             <p className="text-xs text-gray-500">
-              Enter the URL of the website you want to add as a source
+              Entrez l'URL du site web que vous souhaitez ajouter comme source
             </p>
           </div>
 
@@ -70,14 +71,14 @@ const WebsiteUrlInput = ({ open, onOpenChange, onSubmit }: WebsiteUrlInputProps)
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
               className="flex-1"
               disabled={!url.trim() || isLoading}
             >
-              {isLoading ? 'Adding...' : 'Add Source'}
+              {isLoading ? 'Ajout en cours...' : 'Ajouter la source'}
             </Button>
           </div>
         </form>

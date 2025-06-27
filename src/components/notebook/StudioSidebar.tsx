@@ -28,6 +28,7 @@ const StudioSidebar = ({
   const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [audioError, setAudioError] = useState(false);
   const { t } = useLanguage();
+  
   const {
     notes,
     isLoading,
@@ -38,12 +39,15 @@ const StudioSidebar = ({
     isUpdating,
     isDeleting
   } = useNotes(notebookId);
+  
   const {
     notebooks
   } = useNotebooks();
+  
   const {
     sources
   } = useSources(notebookId);
+  
   const {
     generateAudioOverview,
     refreshAudioUrl,
@@ -53,6 +57,7 @@ const StudioSidebar = ({
     generationStatus,
     checkAudioExpiry
   } = useAudioOverview(notebookId);
+  
   const queryClient = useQueryClient();
   const notebook = notebooks?.find(n => n.id === notebookId);
   const hasValidAudio = notebook?.audio_overview_url && !checkAudioExpiry(notebook.audio_url_expires_at);

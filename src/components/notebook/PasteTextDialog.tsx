@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -11,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Copy } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PasteTextDialogProps {
   open: boolean;
@@ -22,6 +22,7 @@ const PasteTextDialog = ({ open, onOpenChange, onSubmit }: PasteTextDialogProps)
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +30,7 @@ const PasteTextDialog = ({ open, onOpenChange, onSubmit }: PasteTextDialogProps)
 
     setIsLoading(true);
     try {
-      await onSubmit(title.trim() || 'Pasted Text', content.trim());
+      await onSubmit(title.trim() || 'Texte collé', content.trim());
       setTitle('');
       setContent('');
       onOpenChange(false);
@@ -55,16 +56,16 @@ const PasteTextDialog = ({ open, onOpenChange, onSubmit }: PasteTextDialogProps)
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Copy className="h-5 w-5 text-gray-600" />
-            <span>Add Text Source</span>
+            <span>Ajouter une source de texte</span>
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="text-title">Title (optional)</Label>
+            <Label htmlFor="text-title">Titre (optionnel)</Label>
             <Input
               id="text-title"
-              placeholder="Enter a title for this text..."
+              placeholder="Entrez un titre pour ce texte..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -72,7 +73,7 @@ const PasteTextDialog = ({ open, onOpenChange, onSubmit }: PasteTextDialogProps)
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="text-content">Content</Label>
+              <Label htmlFor="text-content">Contenu</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -80,12 +81,12 @@ const PasteTextDialog = ({ open, onOpenChange, onSubmit }: PasteTextDialogProps)
                 onClick={handlePasteFromClipboard}
               >
                 <Copy className="h-4 w-4 mr-2" />
-                Paste from clipboard
+                Coller depuis le presse-papiers
               </Button>
             </div>
             <Textarea
               id="text-content"
-              placeholder="Paste or type your text here..."
+              placeholder="Collez ou tapez votre texte ici..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={12}
@@ -93,7 +94,7 @@ const PasteTextDialog = ({ open, onOpenChange, onSubmit }: PasteTextDialogProps)
               className="min-h-[300px]"
             />
             <p className="text-xs text-gray-500">
-              {content.length} characters
+              {content.length} caractères
             </p>
           </div>
 
@@ -104,14 +105,14 @@ const PasteTextDialog = ({ open, onOpenChange, onSubmit }: PasteTextDialogProps)
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
               className="flex-1"
               disabled={!content.trim() || isLoading}
             >
-              {isLoading ? 'Adding...' : 'Add Source'}
+              {isLoading ? 'Ajout en cours...' : 'Ajouter la source'}
             </Button>
           </div>
         </form>

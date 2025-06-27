@@ -157,6 +157,10 @@ export const translations = {
     uploadSource: "Upload a source",
     deleteNotebook: "Delete notebook",
     deleteSource: "Delete source",
+    signedOut: "Signed out",
+    signedOutSuccess: "You have been successfully signed out.",
+    signedOutLocally: "You have been signed out locally.",
+    chooseFile: "Choose file",
   },
   fr: {
     // Auth
@@ -316,6 +320,10 @@ export const translations = {
     uploadSource: "Télécharger une source",
     deleteNotebook: "Supprimer le carnet",
     deleteSource: "Supprimer la source",
+    signedOut: "Déconnecté",
+    signedOutSuccess: "Vous avez été déconnecté avec succès.",
+    signedOutLocally: "Vous avez été déconnecté localement.",
+    chooseFile: "Choisir un fichier",
   }
 };
 

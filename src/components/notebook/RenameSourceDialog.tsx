@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -12,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSourceUpdate } from '@/hooks/useSourceUpdate';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface RenameSourceDialogProps {
   open: boolean;
@@ -23,6 +23,7 @@ interface RenameSourceDialogProps {
 const RenameSourceDialog = ({ open, onOpenChange, source, notebookId }: RenameSourceDialogProps) => {
   const [title, setTitle] = useState('');
   const { updateSource, isUpdating } = useSourceUpdate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (source && open) {
@@ -51,31 +52,31 @@ const RenameSourceDialog = ({ open, onOpenChange, source, notebookId }: RenameSo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Rename {source?.title}?</DialogTitle>
+          <DialogTitle>Renommer {source?.title}?</DialogTitle>
           <DialogDescription>
-            Enter a new name for this source.
+            Entrez un nouveau nom pour cette source.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="source-name">Source Name *</Label>
+            <Label htmlFor="source-name">Nom de la source *</Label>
             <Input
               id="source-name"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter source name"
+              placeholder="Entrez le nom de la source"
             />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button 
             onClick={handleSave}
             disabled={!title.trim() || isUpdating}
           >
-            {isUpdating ? 'Saving...' : 'Save'}
+            {isUpdating ? t('saving') : t('save')}
           </Button>
         </DialogFooter>
       </DialogContent>

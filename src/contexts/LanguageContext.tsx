@@ -24,8 +24,8 @@ interface LanguageProviderProps {
 export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   // Détecter la langue du navigateur ou utiliser le français par défaut
   const getInitialLanguage = (): Language => {
-    const browserLang = navigator.language.split('-')[0];
-    return browserLang === 'fr' ? 'fr' : 'fr'; // Français par défaut
+    // Toujours utiliser le français comme langue par défaut
+    return 'fr';
   };
 
   const [language, setLanguage] = useState<Language>(getInitialLanguage());

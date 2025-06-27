@@ -472,7 +472,7 @@ const AddSourcesDialog = ({
                   disabled={isProcessingFiles}
                   variant="outline"
                 >
-                  Choisir un fichier
+                  {t('chooseFile')}
                 </Button>
               </div>
             </div>

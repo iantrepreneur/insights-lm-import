@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Play, Pause, RotateCcw, Volume2, Download, MoreVertical, Trash2, Loader2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -39,6 +40,7 @@ const AudioPlayer = ({
   const [autoRetryInProgress, setAutoRetryInProgress] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Check if audio is expired
   const isExpired = expiresAt ? new Date(expiresAt) <= new Date() : false;
@@ -211,14 +213,14 @@ const AudioPlayer = ({
       URL.revokeObjectURL(blobUrl);
       
       toast({
-        title: "Download Started",
-        description: "Your audio file is being downloaded.",
+        title: "Téléchargement démarré",
+        description: "Votre fichier audio est en cours de téléchargement.",
       });
     } catch (error) {
       console.error('Download failed:', error);
       toast({
-        title: "Download Failed",
-        description: "Failed to download the audio file. Please try again.",
+        title: "Échec du téléchargement",
+        description: "Impossible de télécharger le fichier audio. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {
@@ -229,8 +231,8 @@ const AudioPlayer = ({
   const deleteAudio = async () => {
     if (!notebookId) {
       toast({
-        title: "Error",
-        description: "Cannot delete audio - notebook ID not found",
+        title: "Erreur",
+        description: "Impossible de supprimer l'audio - ID du carnet non trouvé",
         variant: "destructive",
       });
       return;
@@ -288,8 +290,8 @@ const AudioPlayer = ({
       }
 
       toast({
-        title: "Audio Deleted",
-        description: "The audio overview and associated files have been successfully deleted.",
+        title: "Audio supprimé",
+        description: "L'aperçu audio et les fichiers associés ont été supprimés avec succès.",
       });
 
       // Call the onDeleted callback to update parent component
@@ -298,8 +300,8 @@ const AudioPlayer = ({
     } catch (error) {
       console.error('Failed to delete audio:', error);
       toast({
-        title: "Delete Failed",
-        description: "Failed to delete the audio overview. Please try again.",
+        title: "Échec de la suppression",
+        description: "Impossible de supprimer l'aperçu audio. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {
@@ -332,7 +334,7 @@ const AudioPlayer = ({
               ) : (
                 <Download className="h-4 w-4 mr-2" />
               )}
-              {isDownloading ? 'Downloading...' : 'Download'}
+              {isDownloading ? 'Téléchargement...' : t('download')}
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={deleteAudio}
@@ -340,7 +342,7 @@ const AudioPlayer = ({
               disabled={isDeleting}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              {t('delete')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -351,7 +353,7 @@ const AudioPlayer = ({
         <div className="flex items-center justify-between p-3 bg-blue-50 rounded-md border border-blue-200">
           <div className="flex items-center space-x-2">
             <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
-            <span className="text-sm text-blue-600">Refreshing audio access...</span>
+            <span className="text-sm text-blue-600">Actualisation de l'accès audio...</span>
           </div>
         </div>
       )}
@@ -370,7 +372,7 @@ const AudioPlayer = ({
             className="text-red-600 border-red-300 hover:bg-red-50"
           >
             <RefreshCw className="h-4 w-4 mr-1" />
-            Retry
+            {t('retry')}
           </Button>
         </div>
       )}
