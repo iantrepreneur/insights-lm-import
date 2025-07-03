@@ -10,7 +10,7 @@ const Auth = () => {
           <div className="flex justify-center mb-4">
             <Logo size="lg" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">InsightsLM</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">YnnoviaLM</h1>
           <p className="text-gray-600">Votre compagnon de connaissances alimenté par l'IA</p>
         </div>
         <AuthForm />

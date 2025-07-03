@@ -14,9 +14,9 @@ export const translations = {
     authCredentials: "Enter your credentials to access your notebooks",
     
     // Dashboard
-    welcomeToInsightsLM: "Welcome to InsightsLM",
+    welcomeToInsightsLM: "Welcome to YnnoviaLM",
     createFirstNotebook: "Create your first notebook",
-    insightsLMDescription: "InsightsLM is an AI-powered research and writing assistant that works best with the sources you upload",
+    insightsLMDescription: "YnnoviaLM is an AI-powered research and writing assistant that works best with the sources you upload",
     createNotebook: "Create notebook",
     creating: "Creating...",
     pdfs: "PDFs",
@@ -55,7 +55,7 @@ export const translations = {
     allMessagesDeleted: "All messages have been deleted successfully.",
     
     // Add Sources Dialog
-    sourcesLetInsights: "Sources let InsightsLM base its responses on the information that matters most to you.",
+    sourcesLetInsights: "Sources let YnnoviaLM base its responses on the information that matters most to you.",
     examplesMarketing: "(Examples: marketing plans, course reading, research notes, meeting transcripts, sales documents, etc.)",
     uploadSources: "Upload sources",
     processingFiles: "Processing files...",
@@ -126,7 +126,7 @@ export const translations = {
     back: "Back",
     next: "Next",
     previous: "Previous",
-    insightsLMCanBeInaccurate: "InsightsLM can be inaccurate; please double-check its responses.",
+    insightsLMCanBeInaccurate: "YnnoviaLM can be inaccurate; please double-check its responses.",
     
     // Additional translations
     deleteThisNotebook: "Delete this notebook?",
@@ -177,9 +177,9 @@ export const translations = {
     authCredentials: "Entrez vos identifiants pour accéder à vos carnets",
     
     // Dashboard
-    welcomeToInsightsLM: "Bienvenue sur InsightsLM",
+    welcomeToInsightsLM: "Bienvenue sur YnnoviaLM",
     createFirstNotebook: "Créez votre premier carnet",
-    insightsLMDescription: "InsightsLM est un assistant de recherche et d'écriture alimenté par l'IA qui fonctionne mieux avec les sources que vous téléchargez",
+    insightsLMDescription: "YnnoviaLM est un assistant de recherche et d'écriture alimenté par l'IA qui fonctionne mieux avec les sources que vous téléchargez",
     createNotebook: "Créer un carnet",
     creating: "Création...",
     pdfs: "PDFs",
@@ -218,7 +218,7 @@ export const translations = {
     allMessagesDeleted: "Tous les messages ont été supprimés avec succès.",
     
     // Add Sources Dialog
-    sourcesLetInsights: "Les sources permettent à InsightsLM de baser ses réponses sur les informations qui vous importent le plus.",
+    sourcesLetInsights: "Les sources permettent à YnnoviaLM de baser ses réponses sur les informations qui vous importent le plus.",
     examplesMarketing: "(Exemples : plans marketing, lectures de cours, notes de recherche, transcriptions de réunions, documents de vente, etc.)",
     uploadSources: "Télécharger des sources",
     processingFiles: "Traitement des fichiers...",
@@ -289,7 +289,7 @@ export const translations = {
     back: "Retour",
     next: "Suivant",
     previous: "Précédent",
-    insightsLMCanBeInaccurate: "InsightsLM peut être inexact ; veuillez vérifier ses réponses.",
+    insightsLMCanBeInaccurate: "YnnoviaLM peut être inexact ; veuillez vérifier ses réponses.",
     
     // Additional translations
     deleteThisNotebook: "Supprimer ce carnet ?",
