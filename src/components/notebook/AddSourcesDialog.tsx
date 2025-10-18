@@ -447,7 +447,7 @@ const AddSourcesDialog = ({
                   </h3>
                   <p className="text-gray-600 text-sm">
                     {isProcessingFiles ? (
-                      t('pleaseWaitProcessing')
+                      t('pleaseWaitUpload')
                     ) : (
                       <>
                         {t('dragDropChoose')}
